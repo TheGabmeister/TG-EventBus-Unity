@@ -1,21 +1,43 @@
+using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class EventBus<T> where T : IEvent {
-    static readonly HashSet<IEventBinding<T>> bindings = new HashSet<IEventBinding<T>>();
-    
-    public static void Register(EventBinding<T> binding) => bindings.Add(binding);
-    public static void Deregister(EventBinding<T> binding) => bindings.Remove(binding);
+namespace EventBus
+{ 
 
-    public static void Raise(T @event) {
-        foreach (var binding in bindings) {
-            binding.OnEvent.Invoke(@event);
-            binding.OnEventNoArgs.Invoke();
+public static class Bus<T> where T : IEvent
+{
+    private static readonly HashSet<Action> BindingsWithoutArguments = new();
+    private static readonly HashSet<Action<T>> BindingsWithArguments = new();
+
+    public static void Add(Action<T> binding) => BindingsWithArguments.Add(binding);
+    public static void Add(Action binding) => BindingsWithoutArguments.Add(binding);
+
+    public static void Remove(Action<T> binding) => BindingsWithArguments.Remove(binding);
+    public static void Remove(Action binding) => BindingsWithoutArguments.Remove(binding);
+
+    public static void Raise(T @event)
+    {
+        foreach (Action<T> binding in BindingsWithArguments)
+        {
+            binding?.Invoke(@event);
+        }
+
+        foreach (Action binding in BindingsWithoutArguments)
+        {
+            binding?.Invoke();
         }
     }
 
-    static void Clear() {
-        Debug.Log($"Clearing {typeof(T).Name} bindings");
-        bindings.Clear();
+    /// <summary>Remove all listeners.</summary>
+    [UsedImplicitly] //used via reflection in EventBusUtilities.ClearAllBuses()
+    public static void Clear()
+    {
+        Debug.Log($"Clearing {typeof(T).Name} bindings (removing all listeners)");
+        BindingsWithArguments.Clear();
+        BindingsWithoutArguments.Clear();
     }
+}
+
 }

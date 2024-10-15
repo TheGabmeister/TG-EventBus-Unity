@@ -1,8 +1,14 @@
-﻿public interface IEvent { }
+﻿namespace EventBus
+{ 
+
+public interface IEvent { }
 
 public struct TestEvent : IEvent { }
 
-public struct PlayerEvent : IEvent {
+public struct PlayerEvent : IEvent 
+{
     public int health;
     public int mana;
+}
+
 }

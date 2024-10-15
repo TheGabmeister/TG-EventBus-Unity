@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+namespace EventBus
+{ 
+
 /// <summary>
 /// Contains methods and properties related to event buses and event types in the Unity application.
 /// </summary>
@@ -53,7 +56,7 @@ public static class EventBusUtil {
     static List<Type> InitializeAllBuses() {
         List<Type> eventBusTypes = new List<Type>();
         
-        var typedef = typeof(EventBus<>);
+        var typedef = typeof(Bus<>);
         foreach (var eventType in EventTypes) {
             var busType = typedef.MakeGenericType(eventType);
             eventBusTypes.Add(busType);
@@ -74,4 +77,6 @@ public static class EventBusUtil {
             clearMethod?.Invoke(null, null);
         }
     }
+}
+
 }
